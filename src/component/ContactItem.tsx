@@ -10,10 +10,10 @@ const ContactItem: React.FC<ContactItemProps> = ({ contact }) => {
         <li>
             {contact.name} - {contact.phone}
             <button onClick={() => {}} className="edit">
-                <i className="fas fa-edit"></i>
+                Edit
             </button>
             <button onClick={() => {}} className="delete">
-                <i className="fas fa-trash"></i>
+                Delete
             </button>
         </li>
     );

@@ -1,33 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DirectoryForm from "./DirectoryForm";
 import ContactList from "./ContactList";
+
 import { Contact } from "../interface/Contact";
+import {
+    createContactsResponse,
+    getContactsResponse,
+} from "../interface/ApiResponse";
 import logo from "../assets/directory-logo.jpg";
+import axios from "axios";
 
 const Directory: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
-    const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
-    const addContact = (contact: Omit<Contact, "id">) => {
-        const newContact = { ...contact, id: Date.now() };
-        setContacts([...contacts, newContact]);
-    };
-
-    const updateContact = (updatedContact: Contact) => {
-        setContacts(
-            contacts.map((contact) =>
-                contact.id === updatedContact.id ? updatedContact : contact
-            )
+    const fetchContact = async () => {
+        const response = await axios.get<getContactsResponse>(
+            "http://localhost:3000/api/phone-directory"
         );
+
+        console.log(response.data);
+        setContacts(response.data.data);
     };
 
-    const deleteContact = (id: number) => {
-        setContacts(contacts.filter((contact) => contact.id !== id));
+    const handleAddUser = async (name: string, phone: number) => {
+        const newContact: Contact = {
+            name,
+            phone,
+        };
+
+        const response = await axios.post<createContactsResponse>(
+            "http://localhost:3000/api/phone-directory",
+            newContact
+        );
+
+        setContacts((prevContacts) => [...prevContacts, response.data.data]);
     };
 
-    const resetEditingContact = () => {
-        setEditingContact(null);
-    };
+    useEffect(() => {
+        fetchContact();
+    }, []);
 
     return (
         <div className="directory-container">
@@ -38,7 +49,7 @@ const Directory: React.FC = () => {
                 Contact Counter :{" "}
                 <span id="contact-counter">{contacts.length}</span>
             </h2>
-            <DirectoryForm />
+            <DirectoryForm handleAddUser={handleAddUser} />
             <ContactList contacts={contacts} />
         </div>
     );
